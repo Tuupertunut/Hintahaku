@@ -31,6 +31,7 @@ public class Hinta implements Comparable<Hinta> {
 
     private static final int DESIMAALIEN_MAARA = 2;
 
+    /* Hinta sentteinä, ei euroina. */
     private final long hinta;
 
     public Hinta(long hinta) {
@@ -82,22 +83,36 @@ public class Hinta implements Comparable<Hinta> {
 
     @Override
     public String toString() {
+
+        /* Muunnetaan luku tekstiksi. */
         StringBuilder luku = new StringBuilder(Long.toString(hinta));
+
+        /* Lisätään luvun eteen nollia, kunnes luku on vähintään 3-numeroinen. */
         while (luku.length() < DESIMAALIEN_MAARA + 1) {
             luku.insert(0, "0");
         }
+
+        /* Lisätään lukuun pilkku ja euronmerkki. */
         return luku.insert(luku.length() - DESIMAALIEN_MAARA, ",").append(" €").toString();
     }
 
     public static Hinta parse(String hinta) {
         String luku = hinta;
 
+        /* Poistetaan kaikki euronmerkit ja välilyönnit luvusta. */
         luku = luku.replaceAll("[ €]", "");
 
+        /* Tutkitaan, kuinka monta desimaalia luvussa on pilkun (tai pisteen)
+         * jälkeen. */
         int viimeinenPilkunPaikka = Math.max(luku.lastIndexOf(','), luku.lastIndexOf('.'));
         boolean sisaltaaPilkun = viimeinenPilkunPaikka != -1;
         int numeroitaPilkunJalkeen = (luku.length() - 1) - viimeinenPilkunPaikka;
 
+        /* Lisätään nollia pilkun perään, kunnes luvussa on kaksi desimaalia.
+         * Jos pilkkua ei ole, luku tulkitaan kokonaisluvuksi, eli lisätään
+         * kaksi desimaalia. Jos viimeisimmän pilkun jälkeen on 3 tai enemmän
+         * numeroita, pilkku tulkitaan tuhaterottimeksi, ja lukua kohdellaan
+         * kokonaislukuna. */
         int lisattavatNollat;
         if (!sisaltaaPilkun || numeroitaPilkunJalkeen > DESIMAALIEN_MAARA) {
             lisattavatNollat = DESIMAALIEN_MAARA;
@@ -105,12 +120,14 @@ public class Hinta implements Comparable<Hinta> {
             lisattavatNollat = DESIMAALIEN_MAARA - numeroitaPilkunJalkeen;
         }
 
-        luku = luku.replaceAll("[,.]", "");
-
         for (int i = 0; i < lisattavatNollat; i++) {
-            luku = luku + '0';
+            luku += '0';
         }
 
+        /* Poistetaan pilkut. */
+        luku = luku.replaceAll("[,.]", "");
+
+        /* Muunnetaan teksti luvuksi. */
         try {
             return new Hinta(Long.parseLong(luku));
         } catch (NumberFormatException ex) {

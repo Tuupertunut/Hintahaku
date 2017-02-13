@@ -62,8 +62,8 @@ public class JoukkotilausAlgoritmi {
             }
 
             /* Lisätään listener suurimmalla mahdollisella prioriteetilla, jotta
-             * se varmasti suoritetaan, ennen kuin ostoskori alkaa kyselemään
-             * parhaita hintoja. */
+             * se varmasti ehtii tyhjentää välimuistin, ennen kuin ostoskori
+             * alkaa kyselemään parhaita hintoja. */
             ostoskori.addListener(Integer.MAX_VALUE, OSTOSKORI_LISTENER);
 
             viimeisinOstoskori = ostoskori;

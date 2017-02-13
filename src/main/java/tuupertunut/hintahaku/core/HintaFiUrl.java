@@ -35,6 +35,7 @@ public class HintaFiUrl {
 
     private static final Pattern PATTERN = Pattern.compile("(http(s)?://)?(www\\.)?hinta\\.fi/(?<numerot>\\d+)(/.*)?");
 
+    /* Hinta.fi:n URL:ssa oleva numerosarja, joka yksilöi tuotteen. */
     private final String numerot;
 
     public HintaFiUrl(String numerot) {
