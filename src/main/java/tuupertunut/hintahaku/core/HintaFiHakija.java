@@ -49,10 +49,10 @@ public class HintaFiHakija {
 
         for (Element hintatietoEl : dok.select(".hv-table-list-tr")) {
 
-            Elements nimiEl = hintatietoEl.select("[itemprop=seller]");
-            String kaupanNimi = nimiEl.hasText() ? nimiEl.text() : nimiEl.attr("content");
+            Elements nimiEl = hintatietoEl.select(".hv--store");
+            String kaupanNimi = nimiEl.hasText() ? nimiEl.text() : nimiEl.select("img.hv-store-logo").attr("alt");
 
-            Hinta hinta = Hinta.parse(hintatietoEl.select("[itemprop=price]").text());
+            Hinta hinta = Hinta.parse(hintatietoEl.select(".hv--price").text());
 
             Elements kuluEl = hintatietoEl.select(".hv--delivery-fee");
             Hinta postikulut = kuluEl.hasClass("hv--free") ? new Hinta(0) : kuluEl.hasClass("hv--na") ? null : Hinta.parse(kuluEl.text().replace("(", "").replace(")", ""));
