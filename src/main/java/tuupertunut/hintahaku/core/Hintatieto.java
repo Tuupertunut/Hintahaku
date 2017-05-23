@@ -24,6 +24,7 @@
 package tuupertunut.hintahaku.core;
 
 import java.util.Objects;
+import java.util.Optional;
 import tuupertunut.hintahaku.event.ChangeEvent;
 import tuupertunut.hintahaku.event.ChangeListenable;
 import tuupertunut.hintahaku.event.ChangeListener;
@@ -42,10 +43,10 @@ public class Hintatieto implements ChangeListenable {
     private final Tuote tuote;
     private final String kaupanNimi;
     private final Hinta hinta;
-    private final Hinta postikulut;
+    private final Optional<Hinta> postikulut;
     private final String toimitusaika;
 
-    public Hintatieto(Tuote tuote, String kaupanNimi, Hinta hinta, Hinta postikulut, String toimitusaika) {
+    public Hintatieto(Tuote tuote, String kaupanNimi, Hinta hinta, Optional<Hinta> postikulut, String toimitusaika) {
         this.tuote = tuote;
         this.kaupanNimi = kaupanNimi;
         this.hinta = hinta;
@@ -75,7 +76,6 @@ public class Hintatieto implements ChangeListenable {
         return kaupanNimi;
     }
 
-    /* Ei koskaan palauta null. */
     public Hinta getHinta() {
         /* Jos korjauksista löytyy korjattu hinta tälle hintatiedolle,
          * palautetaan se alkuperäisen sijaan. */
@@ -86,11 +86,11 @@ public class Hintatieto implements ChangeListenable {
         }
     }
 
-    public Hinta getPostikulut() {
+    public Optional<Hinta> getPostikulut() {
         /* Jos korjauksista löytyy korjatut postikulut tälle hintatiedolle,
          * palautetaan ne alkuperäisten sijaan. */
         if (KorjausRajapinta.onkoKorjausta(tuote, kaupanNimi, KorjauksenKohde.POSTIKULUT)) {
-            return KorjausRajapinta.haeKorjaus(tuote, kaupanNimi, KorjauksenKohde.POSTIKULUT).getKorjattuHinta();
+            return Optional.of(KorjausRajapinta.haeKorjaus(tuote, kaupanNimi, KorjauksenKohde.POSTIKULUT).getKorjattuHinta());
         } else {
             return postikulut;
         }
@@ -101,33 +101,23 @@ public class Hintatieto implements ChangeListenable {
     }
 
     /* Hinta, kun se on suodatettu kaupalle asetetuilla suodattimilla */
-    public Hinta getSuodatettuHinta() {
-        Hinta suodatetutPostikulut = getSuodatetutPostikulut();
-        if (suodatetutPostikulut != null) {
-            return getHinta().plus(suodatetutPostikulut);
-        } else {
-            return null;
-        }
+    public Optional<Hinta> getSuodatettuHinta() {
+        return getSuodatetutPostikulut().map(getHinta()::plus);
     }
 
     /* Postikulut, kun ne on suodatettu kaupalle asetetuilla suodattimilla */
-    public Hinta getSuodatetutPostikulut() {
+    public Optional<Hinta> getSuodatetutPostikulut() {
         if (isSuodataPois()) {
-            return null;
+            return Optional.empty();
         } else if (isVoiNoutaa()) {
-            return new Hinta(0);
+            return Optional.of(new Hinta(0));
         } else {
             return getPostikulut();
         }
     }
 
-    public Hinta getHintaKuluineen() {
-        Hinta postikulut = getPostikulut();
-        if (postikulut != null) {
-            return getHinta().plus(postikulut);
-        } else {
-            return null;
-        }
+    public Optional<Hinta> getHintaKuluineen() {
+        return getPostikulut().map(getHinta()::plus);
     }
 
     public Kauppa getKauppa() {

@@ -32,6 +32,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JMenuItem;
@@ -294,10 +295,7 @@ public class HintahakuFrame extends javax.swing.JFrame {
         /* Jos korjausta ei vielä ole, luodaan sellainen käyttäen oletusarvona
          * nykyisiä postikuluja. */
         if (!KorjausRajapinta.onkoKorjausta(tuote, kaupanNimi, KorjauksenKohde.POSTIKULUT)) {
-            Hinta oletusPostikulut = hintatieto.getPostikulut();
-            if (oletusPostikulut == null) {
-                oletusPostikulut = new Hinta(0);
-            }
+            Hinta oletusPostikulut = hintatieto.getPostikulut().orElse(new Hinta(0));
             KorjausRajapinta.lisaaKorjaus(new Korjaus(tuote.getUrl(), tuote.getNimi(), kaupanNimi, KorjauksenKohde.POSTIKULUT, oletusPostikulut));
         }
 
@@ -332,7 +330,7 @@ public class HintahakuFrame extends javax.swing.JFrame {
     private void paivitaHintatiedotTaulukko() {
         EventList<Tuote> valitutHaetutTuotteet = haettuTuoteTaulukkoSelectionModel.getSelected();
         if (!valitutHaetutTuotteet.isEmpty()) {
-            HintatiedotRajapinta.naytaTuote(valitutHaetutTuotteet.get(0));
+            HintatiedotRajapinta.naytaTuote(Optional.of(valitutHaetutTuotteet.get(0)));
         } else {
             EventList<OstoskoriRivi> valitutOstoskoriRivit = ostoskoriTaulukkoSelectionModel.getSelected();
             if (!valitutOstoskoriRivit.isEmpty()) {
@@ -340,18 +338,17 @@ public class HintahakuFrame extends javax.swing.JFrame {
                 /* Jos ostoskorista on valittu monta riviä, ei välitetä kuin
                  * ensimmäisestä. */
                 OstoskoriRivi ensimmainenValittuRivi = valitutOstoskoriRivit.get(0);
-                Tuote rivinEnsisijainenTuote = ensimmainenValittuRivi.getEnsisijainenTuote();
-                Hintatieto rivinOstoksenValittuHintatieto = ensimmainenValittuRivi.getOstos().getValittuHintatieto();
+                Optional<Tuote> rivinEnsisijainenTuote = ensimmainenValittuRivi.getEnsisijainenTuote();
+                Optional<Hintatieto> rivinTuotteenValittuHintatieto = ensimmainenValittuRivi.getOstos().getValittuHintatieto().filter((Hintatieto ht) -> {
 
-                /* Löytyykö rivin tuotteesta rivin ostoksen valittua
-                 * hintatietoa? */
-                if (rivinOstoksenValittuHintatieto != null && rivinOstoksenValittuHintatieto.getTuote().equals(rivinEnsisijainenTuote)) {
-                    HintatiedotRajapinta.naytaTuote(rivinEnsisijainenTuote, rivinOstoksenValittuHintatieto);
-                } else {
-                    HintatiedotRajapinta.naytaTuote(rivinEnsisijainenTuote);
-                }
+                    /* Löytyykö rivin ostoksen valittu hintatieto rivin
+                     * tuotteesta? */
+                    return rivinEnsisijainenTuote.isPresent() && ht.getTuote().equals(rivinEnsisijainenTuote.get());
+                });
+
+                HintatiedotRajapinta.naytaTuote(rivinEnsisijainenTuote, rivinTuotteenValittuHintatieto);
             } else {
-                HintatiedotRajapinta.naytaTuote(null);
+                HintatiedotRajapinta.naytaTuote(Optional.empty());
             }
         }
     }
@@ -1162,7 +1159,7 @@ public class HintahakuFrame extends javax.swing.JFrame {
                     Tuote tuote = get();
 
                     /* Asetetaan tuote haetuksi tuotteeksi. */
-                    HaettuTuoteRajapinta.setTuote(tuote);
+                    HaettuTuoteRajapinta.setTuote(Optional.of(tuote));
 
                     /* Valitaan haettu tuote taulukossa. */
                     EventList<Tuote> valitutHaetutTuotteet = haettuTuoteTaulukkoSelectionModel.getTogglingSelected();
@@ -1326,14 +1323,14 @@ public class HintahakuFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ostoskoriPoistaNappiActionPerformed
 
     private void lisaaOstoskoriinNappiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lisaaOstoskoriinNappiActionPerformed
-        OstoskoriRajapinta.lisaaOstos(HaettuTuoteRajapinta.getTuote());
+        OstoskoriRajapinta.lisaaOstos(HaettuTuoteRajapinta.getTuote().get());
     }//GEN-LAST:event_lisaaOstoskoriinNappiActionPerformed
 
     private void lisaaVaihtoehdoksiNappiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lisaaVaihtoehdoksiNappiActionPerformed
 
         /* Jos ostoskorista on valittu monta riviä, ei välitetä kuin
          * ensimmäisestä. */
-        OstoskoriRajapinta.lisaaVaihtoehto(ostoskoriTaulukkoSelectionModel.getSelected().get(0).getOstos(), HaettuTuoteRajapinta.getTuote());
+        OstoskoriRajapinta.lisaaVaihtoehto(ostoskoriTaulukkoSelectionModel.getSelected().get(0).getOstos(), HaettuTuoteRajapinta.getTuote().get());
     }//GEN-LAST:event_lisaaVaihtoehdoksiNappiActionPerformed
 
     private void suodattimetUusiNappiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suodattimetUusiNappiActionPerformed

@@ -24,6 +24,7 @@
 package tuupertunut.hintahaku.ostoskori;
 
 import java.util.List;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Tuote;
 
@@ -45,7 +46,7 @@ public interface OstoskoriRivi {
 
     void setMaara(int maara);
 
-    Tuote getEnsisijainenTuote();
+    Optional<Tuote> getEnsisijainenTuote();
 
     Ostos getOstos();
 

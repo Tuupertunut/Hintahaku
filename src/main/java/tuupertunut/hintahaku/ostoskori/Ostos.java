@@ -30,6 +30,8 @@ import ca.odell.glazedlists.event.ListEvent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
+import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Hintatieto;
 import tuupertunut.hintahaku.core.Tuote;
 import tuupertunut.hintahaku.event.ChangeListenable;
@@ -79,21 +81,21 @@ public class Ostos implements ChangeListenable {
         cs.fireRootChange("maara", oldMaara, maara);
     }
 
-    /* Saattaa palauttaa null. */
-    public Hintatieto getHalvinSuodatettuHintatieto() {
-        Hintatieto halvin = null;
+    public Optional<Hintatieto> getHalvinSuodatettuHintatieto() {
+        Optional<Hintatieto> halvin = Optional.empty();
         for (Tuote tuote : vaihtoehdot) {
-            Hintatieto tuotteenHalvin = tuote.getHalvinSuodatettuHintatieto();
-            if (tuotteenHalvin != null && (halvin == null || tuotteenHalvin.getSuodatettuHinta().onVahemmanKuin(halvin.getSuodatettuHinta()))) {
+            Optional<Hintatieto> tuotteenHalvin = tuote.getHalvinSuodatettuHintatieto();
+            Optional<Hinta> tuotteenHalvinHinta = tuotteenHalvin.flatMap(Hintatieto::getSuodatettuHinta);
+            Optional<Hinta> halvinHinta = halvin.flatMap(Hintatieto::getSuodatettuHinta);
+            if (tuotteenHalvinHinta.isPresent() && (!halvinHinta.isPresent() || tuotteenHalvinHinta.get().onVahemmanKuin(halvinHinta.get()))) {
                 halvin = tuotteenHalvin;
             }
         }
         return halvin;
     }
 
-    /* Saattaa palauttaa null. */
-    public Hintatieto getValittuHintatieto() {
-        return ostoskori.getValitutHintatiedot().get(this);
+    public Optional<Hintatieto> getValittuHintatieto() {
+        return Optional.ofNullable(ostoskori.getValitutHintatiedot().get(this));
     }
 
     public boolean onkoSamatVaihtoehdot(Collection<Tuote> vaihtoehdot) {

@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.jdom2.JDOMException;
 import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Hintatieto;
@@ -112,7 +113,7 @@ public class OstoskoriRajapinta {
         if (rivi instanceof OstosRivi) {
             poistaOstos(rivi.getOstos());
         } else if (rivi instanceof VaihtoehtoRivi) {
-            poistaVaihtoehto(rivi.getOstos(), rivi.getEnsisijainenTuote());
+            poistaVaihtoehto(rivi.getOstos(), rivi.getEnsisijainenTuote().get());
         }
     }
 
@@ -161,20 +162,23 @@ public class OstoskoriRajapinta {
         Map<String, Hinta> kalleimmatPostikulut = new HashMap<>();
 
         for (Ostos ostos : ostoskori.getOstokset()) {
-            Hintatieto ht = ostos.getValittuHintatieto();
+            Optional<Hintatieto> optHt = ostos.getValittuHintatieto();
 
             /* Huomioidaan vain ne ostokset, jotka on oikeasti mahdollista
              * ostaa. */
-            if (ht != null) {
+            if (optHt.isPresent()) {
+                Hintatieto ht = optHt.get();
 
                 /* Lisätään hinta kerrottuna tuotteiden määrällä
                  * kokonaishintaan. */
                 kokonaisHinta = kokonaisHinta.plus(ht.getHinta().kertaa(ostos.getMaara()));
 
+                /* Tässä vaiheessa tiedetään, että Optional ei voi olla tyhjä. */
+                Hinta postikulut = ht.getSuodatetutPostikulut().get();
+                String kaupanNimi = ht.getKaupanNimi();
+
                 /* Laitetaan muistiin kaupan postikulut. Jos kaupan postikulut
                  * on jo muistissa, säilytetään vain kalleimmat postikulut. */
-                String kaupanNimi = ht.getKaupanNimi();
-                Hinta postikulut = ht.getSuodatetutPostikulut();
                 if (!kalleimmatPostikulut.containsKey(kaupanNimi) || postikulut.onEnemmanKuin(kalleimmatPostikulut.get(kaupanNimi))) {
                     kalleimmatPostikulut.put(kaupanNimi, postikulut);
                 }
@@ -196,7 +200,7 @@ public class OstoskoriRajapinta {
 
             /* Huomioidaan vain ne ostokset, jotka on oikeasti mahdollista
              * ostaa. */
-            if (ostos.getValittuHintatieto() != null) {
+            if (ostos.getValittuHintatieto().isPresent()) {
 
                 /* Lisätään määrä kokonaismäärään. */
                 kokonaisMaara += ostos.getMaara();

@@ -25,6 +25,7 @@ package tuupertunut.hintahaku.ostoskori;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Hintatieto;
 import tuupertunut.hintahaku.core.Tuote;
@@ -43,47 +44,26 @@ public class OstosRivi implements OstoskoriRivi {
 
     @Override
     public String getTuotteenNimi() {
-        Tuote ensisijainenTuote = getEnsisijainenTuote();
 
-        if (ensisijainenTuote != null) {
-            return ensisijainenTuote.getNimi();
-        } else {
-
-            /* Jos ensisijainen tuote on null, se tarkoittaa, että
-             * vaihtoehdoista ei voitu valita ensisijaista vaihtoehtoa
-             * näytettäväksi ostoksen riville. */
-            return "Useita vaihtoehtoja";
-        }
+        /* Jos ensisijaista tuotetta ei ole, se tarkoittaa, että vaihtoehdoista
+         * ei voitu valita ensisijaista vaihtoehtoa näytettäväksi ostoksen
+         * riville. */
+        return getEnsisijainenTuote().map(Tuote::getNimi).orElse("Useita vaihtoehtoja");
     }
 
     @Override
     public String getKaupanNimi() {
-        Hintatieto valittuHintatieto = ostos.getValittuHintatieto();
-        if (valittuHintatieto != null) {
-            return valittuHintatieto.getKaupanNimi();
-        } else {
-            return "Ei saatavilla";
-        }
+        return ostos.getValittuHintatieto().map(Hintatieto::getKaupanNimi).orElse("Ei saatavilla");
     }
 
     @Override
     public String getToimitusaika() {
-        Hintatieto valittuHintatieto = ostos.getValittuHintatieto();
-        if (valittuHintatieto != null) {
-            return valittuHintatieto.getToimitusaika();
-        } else {
-            return "";
-        }
+        return ostos.getValittuHintatieto().map(Hintatieto::getToimitusaika).orElse("");
     }
 
     @Override
     public Hinta getKappalehinta() {
-        Hintatieto valittuHintatieto = ostos.getValittuHintatieto();
-        if (valittuHintatieto != null) {
-            return valittuHintatieto.getHinta();
-        } else {
-            return null;
-        }
+        return ostos.getValittuHintatieto().map(Hintatieto::getHinta).orElse(null);
     }
 
     @Override
@@ -97,25 +77,25 @@ public class OstosRivi implements OstoskoriRivi {
     }
 
     @Override
-    public Tuote getEnsisijainenTuote() {
-        Hintatieto valittuHintatieto = ostos.getValittuHintatieto();
+    public Optional<Tuote> getEnsisijainenTuote() {
+        Optional<Hintatieto> valittuHintatieto = ostos.getValittuHintatieto();
 
         /* Onko tuotteella valittua hintatietoa? */
-        if (valittuHintatieto != null) {
+        if (valittuHintatieto.isPresent()) {
 
             /* Palautetaan se tuotevaihtoehto, jossa valittu hintatieto on. */
-            return valittuHintatieto.getTuote();
+            return valittuHintatieto.map(Hintatieto::getTuote);
 
         } else {
             List<Tuote> vaihtoehdot = ostos.getVaihtoehdot();
 
             /* Jos on vain yksi vaihtoehto, palautetaan se. Muutoin ei ole
              * mitään keinoa päättää, mikä vaihtoehdoista olisi ensisijainen,
-             * joten palautetaan null. */
+             * joten palautetaan tyhjää. */
             if (vaihtoehdot.size() == 1) {
-                return vaihtoehdot.get(0);
+                return Optional.of(vaihtoehdot.get(0));
             } else {
-                return null;
+                return Optional.empty();
             }
         }
     }

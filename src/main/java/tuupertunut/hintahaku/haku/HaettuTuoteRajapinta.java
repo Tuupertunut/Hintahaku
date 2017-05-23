@@ -25,6 +25,7 @@ package tuupertunut.hintahaku.haku;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Tuote;
 import tuupertunut.hintahaku.event.ChangeEvent;
 import tuupertunut.hintahaku.event.ChangeListener;
@@ -41,22 +42,22 @@ public class HaettuTuoteRajapinta {
     private static final EventList<Tuote> LISTA;
     private static final ChangeListener PROXY_LISTENER;
 
-    private static Tuote tuote;
+    private static Optional<Tuote> tuote;
 
     static {
-        tuote = null;
+        tuote = Optional.empty();
 
         PROXY_LISTENER = (ChangeEvent evt) -> CS.fireProxyChange(evt, "tuote");
         addListener((ChangeEvent evt) -> {
             if (evt.getChangedProperty().equals("tuote") && evt.isRootEvent()) {
 
-                Tuote oldTuote = (Tuote) evt.getOldValue();
-                if (oldTuote != null) {
-                    oldTuote.removeListener(PROXY_LISTENER);
+                Optional<Tuote> oldTuote = (Optional<Tuote>) evt.getOldValue();
+                if (oldTuote.isPresent()) {
+                    oldTuote.get().removeListener(PROXY_LISTENER);
                 }
 
-                if (tuote != null) {
-                    tuote.addListener(PROXY_LISTENER);
+                if (tuote.isPresent()) {
+                    tuote.get().addListener(PROXY_LISTENER);
                 }
             }
         });
@@ -66,25 +67,25 @@ public class HaettuTuoteRajapinta {
             if (evt.getChangedProperty().equals("tuote")) {
 
                 LISTA.clear();
-                if (tuote != null) {
-                    LISTA.add(tuote);
+                if (tuote.isPresent()) {
+                    LISTA.add(tuote.get());
                 }
             }
         });
     }
 
-    public static void setTuote(Tuote tuote) {
-        Tuote oldTuote = HaettuTuoteRajapinta.tuote;
+    public static void setTuote(Optional<Tuote> tuote) {
+        Optional<Tuote> oldTuote = HaettuTuoteRajapinta.tuote;
         HaettuTuoteRajapinta.tuote = tuote;
         CS.fireRootChange("tuote", oldTuote, tuote);
     }
 
-    public static Tuote getTuote() {
+    public static Optional<Tuote> getTuote() {
         return tuote;
     }
 
     public static boolean onkoTuotetta() {
-        return tuote != null;
+        return tuote.isPresent();
     }
 
     public static EventList<Tuote> getEventList() {

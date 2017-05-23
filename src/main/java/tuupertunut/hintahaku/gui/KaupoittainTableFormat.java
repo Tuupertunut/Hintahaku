@@ -79,15 +79,21 @@ public class KaupoittainTableFormat implements AdvancedTableFormat<List<Ostos>> 
 
     @Override
     public Object getColumnValue(List<Ostos> baseObject, int column) {
+
+        /* baseObject-listan jokaisella ostoksella on varmasti olemassa valittu
+         * hintatieto. */
         switch (column) {
             case 0:
-                return baseObject.get(0).getValittuHintatieto().getKaupanNimi();
+
+                /* Kaikilla listan ostoksilla on sama valitun hintatiedon
+                 * kauppa, joten haetaan se listan ensimmäisestä elementistä. */
+                return baseObject.get(0).getValittuHintatieto().get().getKaupanNimi();
 
             case 1:
                 Hinta kokonaisHinta = new Hinta(0);
 
                 for (Ostos ostos : baseObject) {
-                    Hintatieto ht = ostos.getValittuHintatieto();
+                    Hintatieto ht = ostos.getValittuHintatieto().get();
 
                     /* Lisätään hinta kerrottuna tuotteiden määrällä
                      * kokonaishintaan. */
@@ -100,10 +106,13 @@ public class KaupoittainTableFormat implements AdvancedTableFormat<List<Ostos>> 
                 Hinta kalleimmatPostikulut = new Hinta(0);
 
                 for (Ostos ostos : baseObject) {
-                    Hintatieto ht = ostos.getValittuHintatieto();
+                    Hintatieto ht = ostos.getValittuHintatieto().get();
+
+                    /* Tässä vaiheessa tiedetään, että Optional ei voi olla
+                     * tyhjä. */
+                    Hinta postikulut = ht.getSuodatetutPostikulut().get();
 
                     /* Säilytetään vain kalleimmat postikulut. */
-                    Hinta postikulut = ht.getSuodatetutPostikulut();
                     if (postikulut.onEnemmanKuin(kalleimmatPostikulut)) {
                         kalleimmatPostikulut = postikulut;
                     }

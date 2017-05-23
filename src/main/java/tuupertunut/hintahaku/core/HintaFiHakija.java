@@ -26,6 +26,7 @@ package tuupertunut.hintahaku.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,7 +56,7 @@ public class HintaFiHakija {
             Hinta hinta = Hinta.parse(hintatietoEl.select(".hv--price").text());
 
             Elements kuluEl = hintatietoEl.select(".hv--delivery-fee");
-            Hinta postikulut = kuluEl.hasClass("hv--free") ? new Hinta(0) : kuluEl.hasClass("hv--na") ? null : Hinta.parse(kuluEl.text().replace("(", "").replace(")", ""));
+            Optional<Hinta> postikulut = kuluEl.hasClass("hv--na") ? Optional.empty() : Optional.of(kuluEl.hasClass("hv--free") ? new Hinta(0) : Hinta.parse(kuluEl.text().replace("(", "").replace(")", "")));
 
             String toimitusaika = hintatietoEl.select(".hv--delivery-time").text().replace("Toimitusaika: ", "");
 

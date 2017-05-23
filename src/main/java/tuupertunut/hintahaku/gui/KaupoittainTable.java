@@ -48,7 +48,7 @@ public class KaupoittainTable extends JTable {
         getTableHeader().setReorderingAllowed(false);
         setAutoResizeMode(AUTO_RESIZE_ALL_COLUMNS);
 
-        FilterList<Ostos> saatavillaOlevat = new FilterList<>(OstoskoriRajapinta.getEventList(), (Ostos o) -> o.getValittuHintatieto() != null);
+        FilterList<Ostos> saatavillaOlevat = new FilterList<>(OstoskoriRajapinta.getEventList(), (Ostos o) -> o.getValittuHintatieto().isPresent());
 
 //        GroupingList<Ostos> kaupoittain = new GroupingList<>(saatavillaOlevat, (Ostos o1, Ostos o2) -> o1.getValittuHintatieto().getKaupanNimi().compareTo(o2.getValittuHintatieto().getKaupanNimi()));
 
@@ -58,7 +58,7 @@ public class KaupoittainTable extends JTable {
         EventList<List<Ostos>> kaupoittain = new BasicEventList<>();
         saatavillaOlevat.addListEventListener((ListEvent<Ostos> listChanges) -> {
             kaupoittain.clear();
-            kaupoittain.addAll(saatavillaOlevat.stream().collect(Collectors.groupingBy((Ostos o) -> o.getValittuHintatieto().getKaupanNimi())).values());
+            kaupoittain.addAll(saatavillaOlevat.stream().collect(Collectors.groupingBy((Ostos o) -> o.getValittuHintatieto().get().getKaupanNimi())).values());
         });
 
         SortedList<List<Ostos>> jarjestetty = new SortedList<>(kaupoittain, (List<Ostos> o1, List<Ostos> o2) -> 0);

@@ -25,6 +25,7 @@ package tuupertunut.hintahaku.ostoskori;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Tuote;
 
@@ -76,8 +77,8 @@ public class VaihtoehtoRivi implements OstoskoriRivi {
     }
 
     @Override
-    public Tuote getEnsisijainenTuote() {
-        return tuote;
+    public Optional<Tuote> getEnsisijainenTuote() {
+        return Optional.of(tuote);
     }
 
     @Override

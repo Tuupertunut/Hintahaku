@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hinta;
 import tuupertunut.hintahaku.core.Hintatieto;
 import tuupertunut.hintahaku.core.Tuote;
@@ -93,15 +94,14 @@ public class JoukkotilausAlgoritmi {
             /* Poistetaan hintatiedot, joiden suodatettua hintaa ei ole
              * määritetty (kauppa on suodatettu pois tai postikuluja ei
              * tiedetä). */
-            yhdistetytHintatiedot.removeIf((Hintatieto ht) -> ht.getSuodatettuHinta() == null);
+            yhdistetytHintatiedot.removeIf((Hintatieto ht) -> !ht.getSuodatettuHinta().isPresent());
 
             /* Optimointi: Poistetaan ostoksesta ne hintatiedot, joiden
              * postikuluton hinta on suurempi kuin halvimman hintatiedon
              * suodatettu (postikulullinen) hinta. */
-            Hintatieto halvinSuodatettuHintatieto = ostos.getHalvinSuodatettuHintatieto();
-            if (halvinSuodatettuHintatieto != null) {
-                Hinta halvinSuodatettu = halvinSuodatettuHintatieto.getSuodatettuHinta();
-                yhdistetytHintatiedot.removeIf((Hintatieto ht) -> ht.getHinta().onEnemmanKuin(halvinSuodatettu));
+            Optional<Hinta> halvinSuodatettu = ostos.getHalvinSuodatettuHintatieto().flatMap(Hintatieto::getSuodatettuHinta);
+            if (halvinSuodatettu.isPresent()) {
+                yhdistetytHintatiedot.removeIf((Hintatieto ht) -> ht.getHinta().onEnemmanKuin(halvinSuodatettu.get()));
             }
 
             /* Jos hintatietolistassa on hintatietoja jäljellä, lisätään ne
@@ -154,10 +154,12 @@ public class JoukkotilausAlgoritmi {
             /* Lisätään hinta kerrottuna tuotteiden määrällä kokonaishintaan. */
             kokonaisHinta = kokonaisHinta.plus(ht.getHinta().kertaa(ostos.getMaara()));
 
+            /* Tässä vaiheessa tiedetään, että Optional ei voi olla tyhjä. */
+            Hinta postikulut = ht.getSuodatetutPostikulut().get();
+            String kaupanNimi = ht.getKaupanNimi();
+
             /* Laitetaan muistiin kaupan postikulut. Jos kaupan postikulut on jo
              * muistissa, säilytetään vain kalleimmat postikulut. */
-            String kaupanNimi = ht.getKaupanNimi();
-            Hinta postikulut = ht.getSuodatetutPostikulut();
             if (!kalleimmatPostikulut.containsKey(kaupanNimi) || postikulut.onEnemmanKuin(kalleimmatPostikulut.get(kaupanNimi))) {
                 kalleimmatPostikulut.put(kaupanNimi, postikulut);
             }

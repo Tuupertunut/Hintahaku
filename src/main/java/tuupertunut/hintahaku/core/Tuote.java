@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import tuupertunut.hintahaku.event.ChangeListenable;
 import tuupertunut.hintahaku.event.ChangeListenableConnector;
 import tuupertunut.hintahaku.event.ChangeListener;
@@ -82,12 +83,13 @@ public class Tuote implements ChangeListenable {
         return hintatiedot;
     }
 
-    public Hintatieto getHalvinSuodatettuHintatieto() {
-        Hintatieto halvin = null;
+    public Optional<Hintatieto> getHalvinSuodatettuHintatieto() {
+        Optional<Hintatieto> halvin = Optional.empty();
         for (Hintatieto ht : hintatiedot) {
-            Hinta htHinta = ht.getSuodatettuHinta();
-            if (htHinta != null && (halvin == null || htHinta.onVahemmanKuin(halvin.getSuodatettuHinta()))) {
-                halvin = ht;
+            Optional<Hinta> htHinta = ht.getSuodatettuHinta();
+            Optional<Hinta> halvinHinta = halvin.flatMap(Hintatieto::getSuodatettuHinta);
+            if (htHinta.isPresent() && (!halvinHinta.isPresent() || htHinta.get().onVahemmanKuin(halvinHinta.get()))) {
+                halvin = Optional.of(ht);
             }
         }
         return halvin;

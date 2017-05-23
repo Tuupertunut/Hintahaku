@@ -41,6 +41,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -148,9 +149,9 @@ public class OstoskoriTable extends JTable {
                  * tuplaklikkaamista ei lasketa. */
                 if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() >= 2 && (columnAtPoint(kohta) != 4 || getModel().getValueAt(rowAtPoint(kohta), 4) == null)) {
 
-                    Tuote klikatunRivinTuote = tuoteKohdassa(kohta);
-                    if (klikatunRivinTuote != null) {
-                        avaaSelaimessa(klikatunRivinTuote);
+                    Optional<Tuote> klikatunRivinTuote = tuoteKohdassa(kohta);
+                    if (klikatunRivinTuote.isPresent()) {
+                        avaaSelaimessa(klikatunRivinTuote.get());
                     } else {
                         JOptionPane.showMessageDialog(OstoskoriTable.this, "Kyseisellä rivillä ei ole tuotetta.", "Ilmoitus", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -165,7 +166,7 @@ public class OstoskoriTable extends JTable {
         JMenuItem avaaSelaimessaValinta = new JMenuItem("Avaa selaimessa");
         avaaSelaimessaValinta.addActionListener((ActionEvent e) -> {
 
-            avaaSelaimessa(tuoteKohdassa(tuoteRivinOikeaKlikkausValikko.getTriggerLocation()));
+            avaaSelaimessa(tuoteKohdassa(tuoteRivinOikeaKlikkausValikko.getTriggerLocation()).get());
         });
         tuoteRivinOikeaKlikkausValikko.add(avaaSelaimessaValinta);
 
@@ -200,7 +201,7 @@ public class OstoskoriTable extends JTable {
 
             private void mousePressedOrReleased(MouseEvent e) {
                 if (e.isPopupTrigger() && e.getComponent().contains(e.getPoint())) {
-                    if (tuoteKohdassa(e.getPoint()) != null) {
+                    if (tuoteKohdassa(e.getPoint()).isPresent()) {
                         tuoteRivinOikeaKlikkausValikko.show(e.getComponent(), e.getX(), e.getY());
                     } else {
                         tuotteettomanRivinOikeaKlikkausValikko.show(e.getComponent(), e.getX(), e.getY());
@@ -214,7 +215,7 @@ public class OstoskoriTable extends JTable {
         return ((AdvancedTableModel<OstoskoriRivi>) getModel()).getElementAt(rowAtPoint(kohta));
     }
 
-    private Tuote tuoteKohdassa(Point kohta) {
+    private Optional<Tuote> tuoteKohdassa(Point kohta) {
         return riviKohdassa(kohta).getEnsisijainenTuote();
     }
 

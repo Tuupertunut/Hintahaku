@@ -93,9 +93,9 @@ public class HintatiedotTableFormat implements AdvancedTableFormat<Hintatieto> {
             case 1:
                 return baseObject.getHinta();
             case 2:
-                return baseObject.getHintaKuluineen();
+                return baseObject.getHintaKuluineen().orElse(null);
             case 3:
-                return baseObject.getPostikulut();
+                return baseObject.getPostikulut().orElse(null);
             case 4:
                 return baseObject.getToimitusaika();
             case 5:

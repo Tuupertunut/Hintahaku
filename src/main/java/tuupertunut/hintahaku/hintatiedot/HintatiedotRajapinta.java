@@ -25,6 +25,7 @@ package tuupertunut.hintahaku.hintatiedot;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hintatieto;
 import tuupertunut.hintahaku.core.Tuote;
 import tuupertunut.hintahaku.event.ChangeEvent;
@@ -42,24 +43,24 @@ public class HintatiedotRajapinta {
     private static final EventList<Hintatieto> LISTA;
     private static final ChangeListener TUOTE_PROXY_LISTENER;
 
-    private static Tuote tuote;
-    private static Hintatieto valittuHintatieto;
+    private static Optional<Tuote> tuote;
+    private static Optional<Hintatieto> valittuHintatieto;
 
     static {
-        tuote = null;
-        valittuHintatieto = null;
+        tuote = Optional.empty();
+        valittuHintatieto = Optional.empty();
 
         TUOTE_PROXY_LISTENER = (ChangeEvent evt) -> CS.fireProxyChange(evt, "tuote");
         addListener((ChangeEvent evt) -> {
             if (evt.getChangedProperty().equals("tuote") && evt.isRootEvent()) {
 
-                Tuote oldTuote = (Tuote) evt.getOldValue();
-                if (oldTuote != null) {
-                    oldTuote.removeListener(TUOTE_PROXY_LISTENER);
+                Optional<Tuote> oldTuote = (Optional<Tuote>) evt.getOldValue();
+                if (oldTuote.isPresent()) {
+                    oldTuote.get().removeListener(TUOTE_PROXY_LISTENER);
                 }
 
-                if (tuote != null) {
-                    tuote.addListener(TUOTE_PROXY_LISTENER);
+                if (tuote.isPresent()) {
+                    tuote.get().addListener(TUOTE_PROXY_LISTENER);
                 }
             }
         });
@@ -69,48 +70,49 @@ public class HintatiedotRajapinta {
             if (evt.getChangedProperty().equals("tuote")) {
 
                 LISTA.clear();
-                if (tuote != null) {
-                    LISTA.addAll(tuote.getHintatiedot());
+                if (tuote.isPresent()) {
+                    LISTA.addAll(tuote.get().getHintatiedot());
                 }
             }
         });
     }
 
-    public static void naytaTuote(Tuote tuote) {
-        naytaTuote(tuote, null);
+    public static void naytaTuote(Optional<Tuote> tuote) {
+        naytaTuote(tuote, Optional.empty());
     }
 
-    public static void naytaTuote(Tuote tuote, Hintatieto valittuHintatieto) {
+    public static void naytaTuote(Optional<Tuote> tuote, Optional<Hintatieto> valittuHintatieto) {
         setTuote(tuote);
         setValittuHintatieto(valittuHintatieto);
     }
 
-    public static Tuote getTuote() {
+    public static Optional<Tuote> getTuote() {
         return tuote;
     }
 
     public static boolean onkoTuotetta() {
-        return tuote != null;
+        return tuote.isPresent();
     }
 
-    private static void setTuote(Tuote tuote) {
-        Tuote oldTuote = HintatiedotRajapinta.tuote;
+    private static void setTuote(Optional<Tuote> tuote) {
+        Optional<Tuote> oldTuote = HintatiedotRajapinta.tuote;
         HintatiedotRajapinta.tuote = tuote;
         CS.fireRootChange("tuote", oldTuote, tuote);
     }
 
-    private static void setValittuHintatieto(Hintatieto valittuHintatieto) {
-        Hintatieto oldValittuHintatieto = HintatiedotRajapinta.valittuHintatieto;
+    private static void setValittuHintatieto(Optional<Hintatieto> valittuHintatieto) {
+        Optional<Hintatieto> oldValittuHintatieto = HintatiedotRajapinta.valittuHintatieto;
         HintatiedotRajapinta.valittuHintatieto = valittuHintatieto;
         CS.fireRootChange("valittuHintatieto", oldValittuHintatieto, valittuHintatieto);
     }
 
     public static boolean onkoValittuHintatieto(Hintatieto hintatieto) {
-        return hintatieto.equals(valittuHintatieto);
+        return valittuHintatieto.isPresent() && hintatieto.equals(valittuHintatieto.get());
     }
 
     public static boolean onkoHalvinHintatieto(Hintatieto hintatieto) {
-        return hintatieto.equals(tuote.getHalvinSuodatettuHintatieto());
+        Optional<Hintatieto> halvinHintatieto = tuote.flatMap(Tuote::getHalvinSuodatettuHintatieto);
+        return halvinHintatieto.isPresent() && hintatieto.equals(halvinHintatieto.get());
     }
 
     public static EventList<Hintatieto> getEventList() {

@@ -78,19 +78,9 @@ public class HaettuTuoteTableFormat implements AdvancedTableFormat<Tuote> {
             case 0:
                 return baseObject.getNimi();
             case 1:
-                Hintatieto halvin = baseObject.getHalvinSuodatettuHintatieto();
-                if (halvin != null) {
-                    return halvin.getKaupanNimi();
-                } else {
-                    return "Ei saatavilla";
-                }
+                return baseObject.getHalvinSuodatettuHintatieto().map(Hintatieto::getKaupanNimi).orElse("Ei saatavilla");
             case 2:
-                Hintatieto halvin2 = baseObject.getHalvinSuodatettuHintatieto();
-                if (halvin2 != null) {
-                    return halvin2.getSuodatettuHinta();
-                } else {
-                    return null;
-                }
+                return baseObject.getHalvinSuodatettuHintatieto().flatMap(Hintatieto::getSuodatettuHinta).orElse(null);
             default:
                 throw new IndexOutOfBoundsException();
         }

@@ -23,6 +23,7 @@
  */
 package tuupertunut.hintahaku.util;
 
+import java.util.Optional;
 import tuupertunut.hintahaku.core.Hinta;
 
 /**
@@ -33,10 +34,10 @@ public class RaakaHintatieto {
 
     public final String kaupanNimi;
     public final Hinta hinta;
-    public final Hinta postikulut;
+    public final Optional<Hinta> postikulut;
     public final String toimitusaika;
 
-    public RaakaHintatieto(String kaupanNimi, Hinta hinta, Hinta postikulut, String toimitusaika) {
+    public RaakaHintatieto(String kaupanNimi, Hinta hinta, Optional<Hinta> postikulut, String toimitusaika) {
         this.kaupanNimi = kaupanNimi;
         this.hinta = hinta;
         this.postikulut = postikulut;
