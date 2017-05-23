@@ -1249,13 +1249,13 @@ public class HintahakuFrame extends javax.swing.JFrame {
                         } catch (HttpStatusException ex1) {
                             switch (ex1.getStatusCode()) {
                                 case 404:
-                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Yhtä tai useampaa ostoskorin tuotetta ei ole olemassa!", "Virhe!", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Ostoskorin tuotetta ei ole olemassa!" + "\n\n" + "Virhe ilmeni yhdistettäessä osoitteeseen:" + '\n' + ex1.getUrl(), "Virhe!", JOptionPane.ERROR_MESSAGE);
                                     break;
                                 case 503:
-                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Tuotteiden haku ei väliaikaisesti ole saatavilla!", "Virhe!", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Tuotteiden haku ei väliaikaisesti ole saatavilla!" + "\n\n" + "Virhe ilmeni yhdistettäessä osoitteeseen:" + '\n' + ex1.getUrl(), "Virhe!", JOptionPane.ERROR_MESSAGE);
                                     break;
                                 default:
-                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Ohjelma ei saa yhteyttä hinta.fi-palvelimeen!", "Virhe!", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(HintahakuFrame.this, "Ohjelma ei saa yhteyttä hinta.fi-palvelimeen!" + "\n\n" + "Virhe ilmeni yhdistettäessä osoitteeseen:" + '\n' + ex1.getUrl(), "Virhe!", JOptionPane.ERROR_MESSAGE);
                             }
                         } catch (IOException ex1) {
                             JOptionPane.showMessageDialog(HintahakuFrame.this, "Ohjelma ei saa yhteyttä hinta.fi-palvelimeen!", "Virhe!", JOptionPane.ERROR_MESSAGE);
