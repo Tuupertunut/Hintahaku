@@ -23,15 +23,12 @@
  */
 package tuupertunut.hintahaku.gui;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.JTable;
 import tuupertunut.hintahaku.gui.util.TableColumnAdjuster;
 import tuupertunut.hintahaku.ostoskori.Ostos;
@@ -50,16 +47,7 @@ public class KaupoittainTable extends JTable {
 
         FilterList<Ostos> saatavillaOlevat = new FilterList<>(OstoskoriRajapinta.getEventList(), (Ostos o) -> o.getValittuHintatieto().isPresent());
 
-//        GroupingList<Ostos> kaupoittain = new GroupingList<>(saatavillaOlevat, (Ostos o1, Ostos o2) -> o1.getValittuHintatieto().getKaupanNimi().compareTo(o2.getValittuHintatieto().getKaupanNimi()));
-
-        /* GroupingListissä on bugi, jonka vuoksi samaan ryhmään kuuluvat
-         * elementit jakautuvat välillä useaksi ryhmäksi. Tämän vuoksi joudutaan
-         * pitämään yllä omaa ryhmiteltyä listaa. */
-        EventList<List<Ostos>> kaupoittain = new BasicEventList<>();
-        saatavillaOlevat.addListEventListener((ListEvent<Ostos> listChanges) -> {
-            kaupoittain.clear();
-            kaupoittain.addAll(saatavillaOlevat.stream().collect(Collectors.groupingBy((Ostos o) -> o.getValittuHintatieto().get().getKaupanNimi())).values());
-        });
+        GroupingList<Ostos> kaupoittain = new GroupingList<>(saatavillaOlevat, (Ostos o1, Ostos o2) -> o1.getValittuHintatieto().get().getKaupanNimi().compareTo(o2.getValittuHintatieto().get().getKaupanNimi()));
 
         SortedList<List<Ostos>> jarjestetty = new SortedList<>(kaupoittain, (List<Ostos> o1, List<Ostos> o2) -> 0);
 

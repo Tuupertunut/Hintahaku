@@ -23,6 +23,7 @@
  */
 package tuupertunut.hintahaku.event;
 
+import ca.odell.glazedlists.ObservableElementChangeHandler;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.event.ListEvent;
 import java.util.EventListener;
@@ -33,7 +34,7 @@ import java.util.EventListener;
  */
 public class ChangeListenableConnector implements ObservableElementList.Connector<ChangeListenable> {
 
-    private ObservableElementList<? extends ChangeListenable> list;
+    private ObservableElementChangeHandler<? extends ChangeListenable> list;
 
     /* A hack to pass the event that caused a list change to the list change
      * listeners. ListChangeEvent doesn't support passing events through, so
@@ -60,7 +61,7 @@ public class ChangeListenableConnector implements ObservableElementList.Connecto
     }
 
     @Override
-    public void setObservableElementList(ObservableElementList<? extends ChangeListenable> list) {
+    public void setObservableElementList(ObservableElementChangeHandler<? extends ChangeListenable> list) {
         this.list = list;
     }
 
